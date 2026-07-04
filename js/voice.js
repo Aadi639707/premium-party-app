@@ -1,6 +1,6 @@
 import { auth, database, ref, push, set, onValue, serverTimestamp } from "./firebase-config.js";
 
-const AGORA_APP_ID = "333a41e97d1945cebb99479b6da8dc61"; // Valid Test ID
+const AGORA_APP_ID = "333a41e97d1945cebb99479b6da8dc61"; // Test ID
 let agoraClient = null, localMic = null, isMuted = true;
 
 export async function createLiveRoom(roomName) {
