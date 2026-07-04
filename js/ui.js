@@ -75,9 +75,8 @@ export function renderEmptySeats() {
 
 export function appendRoomChatMessage(msg, isMe) {
     const chatBox = document.getElementById('room-text-chat');
-    const color = msg.isSystem ? 'text-pink-400 font-bold' : (isMe ? 'text-gray-300' : 'text-gray-400');
     chatBox.innerHTML += `
-        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
             <span class="text-[9px] text-gray-500 font-bold mb-0.5 ml-1">${msg.senderName}</span>
             <div class="px-3 py-2 rounded-xl text-sm ${msg.isSystem ? 'bg-pink-500/10 border border-pink-500/30 text-pink-300' : (isMe ? 'chat-bubble-me' : 'chat-bubble-them')} max-w-[85%]">
                 ${msg.text}
