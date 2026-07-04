@@ -15,11 +15,10 @@ export async function sendVirtualGift(cost, roomId, senderName) {
         const res = await runTransaction(userRef, (coins) => {
             if (coins === null) return coins;
             if (coins >= cost) return coins - cost;
-            return; // Abort
+            return; 
         });
 
         if (res.committed) {
-            // Push gift message to room
             push(ref(database, `/olaparty/room_chats/${roomId}`), {
                 senderId: uid,
                 senderName: senderName,
@@ -29,7 +28,7 @@ export async function sendVirtualGift(cost, roomId, senderName) {
             });
             return true;
         } else {
-            alert("Insufficient Coins. You need 500 coins to send a gift.");
+            alert("Insufficient Coins. You need coins to send gifts.");
             return false;
         }
     } catch (e) { return false; }
