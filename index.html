@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aura | Elite Voice Club</title>
+    <title>Aura | Premium Club</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,7 +25,7 @@
 
     <main class="relative w-full h-full max-w-md bg-dark-900 shadow-2xl flex flex-col overflow-hidden border-x border-white/5">
         
-        <!-- 1. AUTHENTICATION MODULE -->
+        <!-- 1. AUTHENTICATION (Fixed Recaptcha UI) -->
         <section id="view-auth" class="absolute inset-0 z-50 flex flex-col justify-center p-8 bg-dark-900 transition-opacity duration-500 glass-overlay">
             <div class="text-center mb-10 relative z-10">
                 <div class="inline-flex justify-center items-center w-20 h-20 rounded-full bg-dark-800 border border-gold-500/40 shadow-[0_0_40px_rgba(255,215,0,0.2)] mb-4">
@@ -36,7 +35,6 @@
             </div>
             
             <div id="auth-methods" class="flex flex-col gap-4 relative z-10">
-                <!-- Google Login -->
                 <button id="google-login-btn" class="w-full bg-white text-black font-bold text-lg py-4 rounded-2xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform flex items-center justify-center gap-3">
                     <i class="fa-brands fa-google text-xl"></i> Continue with Google
                 </button>
@@ -47,9 +45,8 @@
                     <div class="flex-1 bg-white/10 h-px"></div>
                 </div>
 
-                <!-- Phone Login -->
                 <div id="phone-ui" class="flex flex-col gap-3">
-                    <input type="tel" id="phone-number" placeholder="+1 234 567 8900" class="w-full bg-dark-800 text-white px-5 py-4 rounded-2xl border border-white/5 focus:border-gold-500/50 outline-none">
+                    <input type="tel" id="phone-number" placeholder="Phone (e.g. 9876543210)" class="w-full bg-dark-800 text-white px-5 py-4 rounded-2xl border border-white/5 focus:border-gold-500/50 outline-none">
                     <button id="send-otp-btn" class="w-full bg-dark-800 border border-gold-500/50 text-gold-400 font-bold py-4 rounded-2xl hover:bg-gold-500 hover:text-black transition-all">Send OTP</button>
                 </div>
                 <div id="otp-ui" class="hidden flex-col gap-3">
@@ -60,9 +57,8 @@
             </div>
         </section>
 
-        <!-- 2. MAIN DASHBOARD -->
+        <!-- 2. DASHBOARD -->
         <section id="view-dashboard" class="hidden flex-col h-full w-full relative z-10 pt-16 pb-20">
-            <!-- Top Sticky Bar -->
             <header class="absolute top-0 w-full px-6 py-4 border-b border-white/5 flex justify-between items-center bg-dark-900/95 backdrop-blur-md z-20">
                 <h2 id="header-title" class="text-lg font-display font-bold text-white tracking-wider">AURA</h2>
                 <div class="flex items-center gap-4">
@@ -70,36 +66,29 @@
                         <i class="fa-solid fa-coins text-gold-400 text-xs glow-gold"></i>
                         <span id="wallet-balance" class="text-sm font-bold text-white font-mono">0</span>
                     </div>
-                    <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-bell"></i></button>
-                    <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-gear"></i></button>
                 </div>
             </header>
 
-            <!-- Scrollable Content -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 relative">
                 
                 <!-- Rooms Tab -->
                 <div id="tab-rooms" class="flex flex-col gap-4">
                     <button id="btn-create-room-modal" class="w-full py-4 border-2 border-dashed border-gold-500/50 rounded-2xl text-gold-400 font-bold hover:bg-gold-500/10 transition-colors flex justify-center items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Create My Room
+                        <i class="fa-solid fa-plus"></i> Launch Live Room
                     </button>
-                    <div id="live-rooms-list" class="flex flex-col gap-3 mt-2">
-                        <!-- Fetched Live Rooms -->
-                    </div>
+                    <div id="live-rooms-list" class="flex flex-col gap-3 mt-2"></div>
                 </div>
 
-                <!-- DMs Tab -->
+                <!-- Chat/DMs Tab -->
                 <div id="tab-dms" class="hidden flex-col h-full gap-2">
-                    <h3 class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2">Recent Chats</h3>
-                    <div id="dm-users-list" class="flex flex-col gap-2">
-                        <!-- Fetched Users for DM -->
-                    </div>
+                    <h3 class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2">Network (DMs)</h3>
+                    <div id="dm-users-list" class="flex flex-col gap-2"></div>
                 </div>
 
                 <!-- Profile Tab -->
                 <div id="tab-profile" class="hidden flex-col items-center pt-4">
                     <div class="relative group cursor-pointer" id="btn-edit-dp">
-                        <img id="profile-avatar" src="" alt="Avatar" class="w-32 h-32 rounded-full border-4 border-dark-900 ring-4 ring-gold-500 object-cover shadow-[0_0_20px_rgba(255,215,0,0.2)]">
+                        <img id="profile-avatar" src="https://ui-avatars.com/api/?name=VIP&background=ffd700&color=000" class="w-32 h-32 rounded-full border-4 border-dark-900 ring-4 ring-gold-500 object-cover shadow-[0_0_20px_rgba(255,215,0,0.2)]">
                         <div class="absolute inset-0 bg-black/50 rounded-full flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <i class="fa-solid fa-camera text-2xl text-white"></i>
                         </div>
@@ -111,17 +100,12 @@
                     <h3 id="profile-name" class="text-2xl font-bold mt-8 text-white">...</h3>
                     <p id="profile-bio" class="text-gray-400 text-sm mt-2 text-center max-w-[80%]">No bio set.</p>
                     
-                    <button id="btn-edit-profile" class="mt-6 px-6 py-2 bg-dark-800 border border-white/10 rounded-full text-sm font-bold hover:border-gold-500 transition-colors">
-                        Edit Profile
-                    </button>
-
-                    <button id="logout-btn" class="mt-12 w-full py-4 border border-red-500/20 text-red-400 rounded-2xl hover:bg-red-500/10 transition-all font-bold tracking-wide text-sm">
-                        Log Out
-                    </button>
+                    <button id="btn-edit-profile" class="mt-6 px-6 py-2 bg-dark-800 border border-white/10 rounded-full text-sm font-bold hover:border-gold-500 transition-colors">Edit Profile</button>
+                    <button id="logout-btn" class="mt-12 w-full py-4 border border-red-500/20 text-red-400 rounded-2xl hover:bg-red-500/10 transition-all font-bold text-sm">Log Out</button>
                 </div>
             </div>
 
-            <!-- Sticky Bottom Navigation -->
+            <!-- Bottom Navigation -->
             <nav class="absolute bottom-0 w-full bg-dark-900/95 backdrop-blur-xl border-t border-white/5 flex justify-around items-center py-4 z-20">
                 <button class="nav-btn active flex flex-col items-center gap-1 text-gold-400 transition-all" data-target="tab-rooms">
                     <i class="fa-solid fa-house text-xl"></i>
@@ -140,10 +124,10 @@
 
         <!-- Modals -->
         <div id="modal-edit-profile" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-6">
-            <div class="bg-dark-900 border border-white/10 rounded-3xl w-full p-6">
+            <div class="bg-dark-900 border border-white/10 rounded-3xl w-full p-6 shadow-2xl">
                 <h3 class="text-xl font-bold mb-4">Edit Profile</h3>
                 <input type="text" id="edit-name-input" placeholder="Display Name" class="w-full bg-dark-800 text-white px-4 py-3 rounded-xl border border-white/5 mb-3 outline-none">
-                <textarea id="edit-bio-input" placeholder="Bio..." rows="3" class="w-full bg-dark-800 text-white px-4 py-3 rounded-xl border border-white/5 mb-4 outline-none resize-none custom-scrollbar"></textarea>
+                <textarea id="edit-bio-input" placeholder="Bio..." rows="3" class="w-full bg-dark-800 text-white px-4 py-3 rounded-xl border border-white/5 mb-4 outline-none resize-none"></textarea>
                 <div class="flex gap-3">
                     <button id="cancel-edit-btn" class="flex-1 py-3 bg-dark-800 rounded-xl font-bold">Cancel</button>
                     <button id="save-profile-btn" class="flex-1 py-3 bg-gold-500 text-black rounded-xl font-bold">Save</button>
@@ -152,17 +136,17 @@
         </div>
 
         <div id="modal-create-room" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-6">
-            <div class="bg-dark-900 border border-white/10 rounded-3xl w-full p-6">
+            <div class="bg-dark-900 border border-white/10 rounded-3xl w-full p-6 shadow-2xl">
                 <h3 class="text-xl font-bold mb-4">Launch New Room</h3>
                 <input type="text" id="new-room-name" placeholder="e.g. Late Night Vibes" class="w-full bg-dark-800 text-white px-4 py-3 rounded-xl border border-white/5 mb-4 outline-none">
                 <div class="flex gap-3">
                     <button id="cancel-room-btn" class="flex-1 py-3 bg-dark-800 rounded-xl font-bold">Cancel</button>
-                    <button id="confirm-create-room-btn" class="flex-1 py-3 bg-gold-500 text-black rounded-xl font-bold">Launch Live</button>
+                    <button id="confirm-create-room-btn" class="flex-1 py-3 bg-gold-500 text-black rounded-xl font-bold">Launch</button>
                 </div>
             </div>
         </div>
 
-        <!-- DM Chat View Overlay -->
+        <!-- 3. DM CHAT OVERLAY -->
         <div id="dm-chat-view" class="hidden absolute inset-0 z-[55] bg-dark-900 flex flex-col h-full">
             <header class="px-6 py-4 border-b border-white/5 flex items-center gap-4 bg-dark-800 pt-8">
                 <button id="close-dm-btn" class="text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-arrow-left"></i></button>
@@ -172,13 +156,12 @@
             <div id="dm-messages-list" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 custom-scrollbar"></div>
             <div class="p-4 bg-dark-800 border-t border-white/5 flex gap-2 items-center pb-8">
                 <input type="text" id="dm-input" placeholder="Message..." class="flex-1 bg-dark-900 text-white px-4 py-3 rounded-xl border border-white/5 outline-none focus:border-gold-500/50">
-                <button id="dm-send-btn" class="w-12 h-12 bg-gold-500 text-black rounded-xl flex items-center justify-center hover:scale-105 transition-transform"><i class="fa-solid fa-paper-plane"></i></button>
+                <button id="dm-send-btn" class="w-12 h-12 bg-gold-500 text-black rounded-xl flex items-center justify-center hover:scale-105"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
 
-        <!-- 3. ACTIVE VOICE ROOM -->
+        <!-- 4. ACTIVE VOICE ROOM -->
         <section id="view-active-room" class="hidden absolute inset-0 z-[60] bg-dark-900 flex flex-col transform translate-y-full transition-transform duration-500">
-            <!-- Room Header -->
             <div class="relative h-48 bg-dark-800 p-6 pt-12 flex flex-col justify-between overflow-hidden rounded-b-[2rem] border-b border-white/5 z-10 shadow-2xl">
                 <div class="relative z-10 flex justify-between items-start">
                     <div>
@@ -192,19 +175,14 @@
                 </div>
             </div>
 
-            <!-- Voice Seats -->
             <div class="px-8 pt-6 relative z-0">
                 <div class="grid grid-cols-4 gap-y-8 gap-x-4 place-items-center" id="voice-seats"></div>
             </div>
 
-            <!-- Room Text Chat Overlay -->
             <div class="flex-1 px-4 py-2 mt-4 relative overflow-hidden flex flex-col justify-end">
-                <div id="room-text-chat" class="w-full max-h-[150px] overflow-y-auto custom-scrollbar flex flex-col gap-2 mask-image-top pb-2">
-                    <!-- Live room messages -->
-                </div>
+                <div id="room-text-chat" class="w-full max-h-[150px] overflow-y-auto custom-scrollbar flex flex-col gap-2 mask-image-top pb-2"></div>
             </div>
 
-            <!-- Room Toolbar -->
             <div class="p-4 pb-8 flex gap-3 items-center bg-dark-900 border-t border-white/5 relative z-10">
                 <button id="mic-btn" class="w-12 h-12 rounded-full bg-dark-800 flex justify-center items-center text-white text-lg shadow-lg border border-white/5"><i class="fa-solid fa-microphone-slash"></i></button>
                 <input type="text" id="room-msg-input" placeholder="Say hello..." class="flex-1 bg-dark-800 text-white px-4 py-3 rounded-full border border-white/5 outline-none text-sm">
@@ -212,9 +190,9 @@
                 <button id="gift-btn" class="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white flex items-center justify-center shadow-lg"><i class="fa-solid fa-gift"></i></button>
             </div>
         </section>
-        
     </main>
 
+    <!-- Correct JS Module Import -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
