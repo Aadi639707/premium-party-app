@@ -1,76 +1,62 @@
-import { AGORA_APP_ID } from "./config.js";
+import { auth, database, ref, push, set, onValue, serverTimestamp } from "./firebase-config.js";
 
-let agoraClient = null;
-let localAudioTrack = null;
-let isMuted = true;
-let currentRoom = null;
-let seatUpdateCallback = null;
+const AGORA_APP_ID = "333a41e97d1945cebb99479b6da8dc61"; // Valid Test ID
+let agoraClient = null, localMic = null, isMuted = true;
 
-export async function joinVoiceRoom(roomId, onSeatUpdate) {
-    if (agoraClient) return; // Already in a room
-    
-    currentRoom = roomId;
-    seatUpdateCallback = onSeatUpdate;
+export async function createLiveRoom(roomName) {
+    const uid = auth.currentUser.uid;
+    const roomRef = push(ref(database, `/olaparty/rooms`));
+    await set(roomRef, {
+        id: roomRef.key,
+        name: roomName,
+        creator: uid,
+        usersCount: 1,
+        timestamp: serverTimestamp()
+    });
+    return roomRef.key;
+}
+
+export function listenToActiveRooms(callback) {
+    onValue(ref(database, `/olaparty/rooms`), (snap) => {
+        const rooms = [];
+        snap.forEach(child => { rooms.push(child.val()); });
+        callback(rooms);
+    });
+}
+
+export async function joinAudioRoom(roomId, onSeatUpdate) {
+    if (agoraClient) return;
+    agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
     isMuted = true;
 
-    // Initialize Agora Web SDK
-    agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-
-    // Handle remote users speaking
     agoraClient.on("user-published", async (user, mediaType) => {
         await agoraClient.subscribe(user, mediaType);
         if (mediaType === "audio") {
             user.audioTrack.play();
-            seatUpdateCallback(user.uid, true, false); // true=speaking, false=isLocal
+            onSeatUpdate(user.uid, true, false);
         }
     });
 
-    // Handle remote users leaving
     agoraClient.on("user-unpublished", (user) => {
-        seatUpdateCallback(user.uid, false, false, true); // true=left
+        onSeatUpdate(user.uid, false, false, true);
     });
 
     try {
-        // Join channel (using null token for testing/github pages simplicity)
         const uid = await agoraClient.join(AGORA_APP_ID, roomId, null, null);
-        
-        // Create Mic Track
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        
-        // Push local user to UI seat
-        seatUpdateCallback(uid, false, true); // false=not speaking yet, true=isLocal
-
-    } catch (error) {
-        console.error("Voice Engine Failed:", error);
-        leaveVoiceRoom();
-    }
+        localMic = await AgoraRTC.createMicrophoneAudioTrack();
+        onSeatUpdate(uid, false, true);
+    } catch (error) { console.error("VC Error", error); }
 }
 
-export async function toggleMic() {
-    if (!localAudioTrack || !agoraClient) return null;
-    
-    if (isMuted) {
-        await agoraClient.publish([localAudioTrack]);
-        isMuted = false;
-    } else {
-        await agoraClient.unpublish([localAudioTrack]);
-        isMuted = true;
-    }
-    
-    // Update local UI
-    seatUpdateCallback(agoraClient.uid, !isMuted, true);
+export async function toggleMicrophone(onSeatUpdate) {
+    if (!localMic || !agoraClient) return null;
+    if (isMuted) { await agoraClient.publish([localMic]); isMuted = false; } 
+    else { await agoraClient.unpublish([localMic]); isMuted = true; }
+    onSeatUpdate(agoraClient.uid, !isMuted, true);
     return isMuted;
 }
 
-export async function leaveVoiceRoom() {
-    if (localAudioTrack) {
-        localAudioTrack.stop();
-        localAudioTrack.close();
-        localAudioTrack = null;
-    }
-    if (agoraClient) {
-        await agoraClient.leave();
-        agoraClient = null;
-    }
-    currentRoom = null;
+export async function leaveAudioRoom() {
+    if (localMic) { localMic.stop(); localMic.close(); localMic = null; }
+    if (agoraClient) { await agoraClient.leave(); agoraClient = null; }
 }
