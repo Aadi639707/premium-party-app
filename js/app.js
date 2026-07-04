@@ -8,9 +8,6 @@ let currentUserProfile = null;
 let activeRoomId = null;
 let currentDMPartnerId = null;
 
-// ==========================================
-// 1. BOOTSTRAP & AUTH
-// ==========================================
 setupTabs();
 
 initAuth(UI, 
@@ -19,20 +16,20 @@ initAuth(UI,
 );
 
 function initDashboard(uid) {
-    // Economy & Profile Sync
+    // Sync Profile Data
     listenToEconomy(uid, (data) => {
         currentUserProfile = data;
         document.getElementById('wallet-balance').textContent = parseInt(data.coins).toLocaleString();
         document.getElementById('profile-name').textContent = data.name;
         document.getElementById('profile-bio').textContent = data.bio;
         document.getElementById('vip-level').textContent = data.vip;
-        document.getElementById('profile-avatar').src = data.dp;
+        if (data.dp) document.getElementById('profile-avatar').src = data.dp;
     });
 
-    // Live Rooms Sync
+    // Load Live Rooms
     listenToActiveRooms((rooms) => { renderLiveRooms(rooms, openRoom); });
 
-    // Users List for DMs
+    // Load DMs User List
     onValue(ref(database, `/olaparty/users`), (snap) => {
         const list = document.getElementById('dm-users-list');
         list.innerHTML = '';
@@ -40,18 +37,16 @@ function initDashboard(uid) {
             if(child.key !== uid) {
                 const u = child.val();
                 list.innerHTML += `
-                    <div class="flex items-center gap-3 p-3 bg-dark-800 rounded-xl cursor-pointer hover:bg-white/5 border border-transparent hover:border-white/10" onclick="window.openDM('${child.key}', '${u.name}', '${u.dp}')">
+                    <div class="flex items-center gap-3 p-3 bg-dark-800 rounded-xl cursor-pointer border border-transparent hover:border-white/10" onclick="window.openDM('${child.key}', '${u.name}', '${u.dp}')">
                         <img src="${u.dp}" class="w-10 h-10 rounded-full object-cover">
-                        <div class="flex-1"><h4 class="font-bold text-sm text-white">${u.name}</h4><p class="text-[10px] text-gray-500 text-gold-500">VIP ${u.vip}</p></div>
+                        <div class="flex-1"><h4 class="font-bold text-sm text-white">${u.name}</h4></div>
                     </div>`;
             }
         });
     });
 }
 
-// ==========================================
-// 2. PROFILE EDITING LOGIC
-// ==========================================
+// ================== PROFILE SYSTEM ==================
 document.getElementById('btn-edit-profile').onclick = () => {
     document.getElementById('edit-name-input').value = currentUserProfile.name;
     document.getElementById('edit-bio-input').value = currentUserProfile.bio;
@@ -70,20 +65,17 @@ document.getElementById('save-profile-btn').onclick = async () => {
     }
 };
 
-// Base64 DP Upload
 document.getElementById('btn-edit-dp').onclick = () => document.getElementById('dp-upload').click();
 attachImageUploader(document.getElementById('dp-upload'), async (base64) => {
     await set(ref(database, `/olaparty/users/${auth.currentUser.uid}/dp`), base64);
 });
 
-// ==========================================
-// 3. ROOM CREATION & VC LOGIC
-// ==========================================
+// ================== ROOMS & VOICE ==================
 document.getElementById('btn-create-room-modal').onclick = () => document.getElementById('modal-create-room').classList.remove('hidden');
 document.getElementById('cancel-room-btn').onclick = () => document.getElementById('modal-create-room').classList.add('hidden');
 
 document.getElementById('confirm-create-room-btn').onclick = async () => {
-    const rName = document.getElementById('new-room-name').value.trim() || `${currentUserProfile.name}'s Party`;
+    const rName = document.getElementById('new-room-name').value.trim() || `${currentUserProfile.name}'s Room`;
     document.getElementById('modal-create-room').classList.add('hidden');
     const roomId = await createLiveRoom(rName);
     openRoom(roomId, rName);
@@ -93,10 +85,10 @@ function openRoom(roomId, roomName) {
     activeRoomId = roomId;
     document.getElementById('active-room-title').textContent = roomName;
     document.getElementById('view-active-room').classList.add('slide-up-active');
-    document.getElementById('room-text-chat').innerHTML = ''; // Clear chat
+    document.getElementById('room-text-chat').innerHTML = ''; 
     renderEmptySeats();
 
-    // Listen for room texts
+    // Listen room text chat
     onValue(ref(database, `/olaparty/room_chats/${roomId}`), (snap) => {
         document.getElementById('room-text-chat').innerHTML = '';
         snap.forEach(c => appendRoomChatMessage(c.val(), c.val().senderId === auth.currentUser.uid));
@@ -130,7 +122,6 @@ function closeRoom() {
     leaveAudioRoom(); activeRoomId = null;
 }
 
-// Room Text Chat Send
 document.getElementById('room-send-btn').onclick = () => {
     const i = document.getElementById('room-msg-input');
     const text = i.value.trim();
@@ -142,14 +133,11 @@ document.getElementById('room-send-btn').onclick = () => {
     }
 };
 
-// Send Gift
 document.getElementById('gift-btn').onclick = () => {
     if(activeRoomId) sendVirtualGift(500, activeRoomId, currentUserProfile.name);
 };
 
-// ==========================================
-// 4. REAL-TIME DIRECT MESSAGING (DMs)
-// ==========================================
+// ================== DIRECT MESSAGES ==================
 window.openDM = (partnerId, partnerName, partnerDp) => {
     currentDMPartnerId = partnerId;
     document.getElementById('dm-partner-name').textContent = partnerName;
@@ -188,4 +176,3 @@ document.getElementById('dm-send-btn').onclick = () => {
         i.value = '';
     }
 };
-    
