@@ -9,4 +9,4 @@ export const firebaseConfig = {
 };
 
 // Agora Real-Time Voice Configuration
-export const AGORA_APP_ID = "YOUR_AGORA_APP_ID"; // Get from agora.io console
+export const AGORA_APP_ID = "092778fb8294423abad0d939911b9ef4"; // Get from agora.io console
