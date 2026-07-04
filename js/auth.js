@@ -1,56 +1,61 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { auth, db } from "./firebase-init.js";
+import { auth, googleProvider, RecaptchaVerifier, signInWithPopup, signInWithPhoneNumber, onAuthStateChanged, signOut, database, ref, set, get } from "./firebase-config.js";
 
-export function setupAuth(uiElements, callbacks) {
-    let isLoginMode = true;
+export function initAuth(UI, onLoginSuccess, onLogout) {
+    let confirmationResult = null;
 
-    // Toggle Form UI
-    uiElements.toggleAuthText.addEventListener('click', () => {
-        isLoginMode = !isLoginMode;
-        uiElements.authBtn.textContent = isLoginMode ? 'Enter Club' : 'Create VIP Identity';
-        uiElements.toggleAuthText.innerHTML = isLoginMode 
-            ? 'Apply for access? <span class="text-gold-400 font-bold hover:text-gold-300">Sign Up</span>'
-            : 'Already a member? <span class="text-gold-400 font-bold hover:text-gold-300">Login</span>';
-    });
-
-    // Handle Submit
-    uiElements.authForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = uiElements.authEmail.value.trim();
-        const password = uiElements.authPassword.value.trim();
-        const originalText = uiElements.authBtn.textContent;
-        uiElements.authBtn.textContent = 'Verifying...';
-
-        try {
-            if (isLoginMode) {
-                await signInWithEmailAndPassword(auth, email, password);
-            } else {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                // Initialize Billionaire Wallet Profile
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    email: email,
-                    coins: 100000, // Premium startup balance
-                    level: 1,
-                    followers: 0,
-                    following: 0
-                });
-            }
-        } catch (error) {
-            alert("Auth Error: " + error.message);
-            uiElements.authBtn.textContent = originalText;
-        }
-    });
-
-    // Handle Logout
-    uiElements.logoutBtn.addEventListener('click', () => signOut(auth));
-
-    // Listen for Auth State Changes
-    onAuthStateChanged(auth, (user) => {
+    // Persist Auth State
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            callbacks.onLogin(user);
+            await ensureUserExistsInDB(user);
+            onLoginSuccess(user);
         } else {
-            callbacks.onLogout();
+            onLogout();
         }
     });
+
+    // Google Login
+    UI.googleLoginBtn.addEventListener('click', async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) { alert("Google Login Failed: " + error.message); }
+    });
+
+    // Phone Login - Setup Recaptcha
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+
+    UI.sendOtpBtn.addEventListener('click', async () => {
+        const phone = UI.phoneInput.value.trim();
+        if (!phone) return alert("Enter a valid phone number with country code.");
+        try {
+            confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+            UI.phoneUI.classList.add('hidden');
+            UI.otpUI.classList.remove('hidden');
+            UI.otpUI.classList.add('flex');
+        } catch (error) { alert("Failed to send OTP: " + error.message); }
+    });
+
+    UI.verifyOtpBtn.addEventListener('click', async () => {
+        const code = UI.otpInput.value.trim();
+        if(!code) return;
+        try {
+            await confirmationResult.confirm(code);
+        } catch (error) { alert("Invalid OTP."); }
+    });
+
+    UI.logoutBtn.addEventListener('click', () => signOut(auth));
+}
+
+// Guarantee User Node Exists
+async function ensureUserExistsInDB(user) {
+    const userRef = ref(database, `/olaparty/users/${user.uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) {
+        await set(userRef, {
+            name: user.displayName || "New VIP User",
+            dp: user.photoURL || `https://ui-avatars.com/api/?name=VIP&background=ffd700&color=000`,
+            bio: "I'm new to Aura!",
+            coins: 0,
+            vip: 0
+        });
+    }
 }
