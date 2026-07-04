@@ -34,7 +34,6 @@
     animation: luxury-float 2s ease-out forwards;
 }
 
-/* Fade out top of chat */
 .mask-image-top {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
