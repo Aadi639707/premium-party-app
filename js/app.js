@@ -1,3 +1,4 @@
+alert("Bhai, naya JavaScript link ho gaya hai!");
 import { auth, database, ref, set, onValue, push, serverTimestamp } from "./firebase-config.js";
 import { initAuth } from "./auth.js";
 import { listenToEconomy, sendVirtualGift } from "./economy.js";
