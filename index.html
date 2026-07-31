@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aura | Premium Club</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Outfit', 'sans-serif'], display: ['Syncopate', 'sans-serif'] }, colors: { dark: { 900: '#050505', 800: '#0f0f13', 700: '#1a1a24' }, gold: { 400: '#ffd700', 500: '#e6c200' } } } } }
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+</head>
+<body class="bg-black text-gray-100 h-screen w-screen overflow-hidden antialiased flex justify-center">
+
+    <main class="relative w-full h-full max-w-md bg-dark-900 shadow-2xl flex flex-col overflow-hidden border-x border-white/5">
+        
+        <section id="view-auth" class="absolute inset-0 z-50 flex flex-col justify-center p-8 bg-dark-900 glass-overlay">
+            <div class="text-center mb-10">
+                <i class="fa-solid fa-crown text-5xl text-gold-400 glow-gold mb-4"></i>
+                <h1 class="text-4xl font-display font-bold tracking-widest text-gold-400">AURA</h1>
+            </div>
+            <div class="flex flex-col gap-4">
+                <button id="google-login-btn" class="w-full bg-white text-black font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-google text-xl"></i> Continue with Google
+                </button>
+                <div class="flex items-center my-2 text-gray-500 text-xs font-bold uppercase"><div class="flex-1 bg-white/10 h-px mr-4"></div>OR<div class="flex-1 bg-white/10 h-px ml-4"></div></div>
+                <div id="phone-ui" class="flex flex-col gap-3">
+                    <input type="tel" id="phone-number" placeholder="Phone (e.g. 9876543210)" class="w-full bg-dark-800 text-white px-5 py-4 rounded-2xl border border-white/5 outline-none focus:border-gold-500/50">
+                    <button id="send-otp-btn" class="w-full bg-dark-800 text-gold-400 font-bold py-4 rounded-2xl border border-gold-500/50 hover:bg-gold-500 hover:text-black transition-all">Send OTP</button>
+                </div>
+                <div id="otp-ui" class="hidden flex-col gap-3">
+                    <input type="text" id="otp-code" placeholder="Enter 6-digit OTP" class="w-full bg-dark-800 text-white px-5 py-4 rounded-2xl border border-white/5 outline-none text-center font-mono tracking-widest text-xl">
+                    <button id="verify-otp-btn" class="w-full bg-gradient-to-r from-gold-500 to-yellow-600 text-black font-extrabold py-4 rounded-2xl">Verify & Enter</button>
+                </div>
+                <div id="recaptcha-container" class="mt-2 flex justify-center"></div>
+            </div>
+        </section>
+
+        <section id="view-dashboard" class="hidden flex-col h-full w-full relative z-10 pt-16 pb-20">
+            <header class="absolute top-0 w-full px-6 py-4 flex justify-between items-center bg-dark-900/95 backdrop-blur z-20 border-b border-white/5">
+                <h2 class="text-lg font-display font-bold text-white">AURA</h2>
+                <div class="flex items-center gap-2 bg-dark-800 px-4 py-1.5 rounded-full border border-gold-500/20">
+                    <i class="fa-solid fa-coins text-gold-400 text-xs"></i>
+                    <span id="wallet-balance" class="text-sm font-bold text-white">0</span>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6 relative custom-scrollbar">
+                <div id="tab-rooms" class="flex flex-col gap-4">
+                    <button id="btn-create-room" class="w-full py-4 border-2 border-dashed border-gold-500/50 rounded-2xl text-gold-400 font-bold flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Launch Live Room
+                    </button>
+                    <div id="live-rooms-list" class="flex flex-col gap-3 mt-2"></div>
+                </div>
+
+                <div id="tab-dms" class="hidden flex-col h-full gap-2">
+                    <h3 class="text-xs text-gray-500 font-bold uppercase mb-2">Network (DMs)</h3>
+                    <div id="dm-users-list" class="flex flex-col gap-2"></div>
+                </div>
+
+                <div id="tab-profile" class="hidden flex-col items-center pt-4">
+                    <img id="profile-avatar" src="https://ui-avatars.com/api/?name=VIP&background=ffd700&color=000" class="w-28 h-28 rounded-full border-4 border-dark-900 ring-2 ring-gold-500 object-cover mb-4">
+                    <h3 id="profile-name" class="text-2xl font-bold text-white">...</h3>
+                    <p id="profile-bio" class="text-gray-400 text-sm mt-2">No bio set.</p>
+                    <button id="logout-btn" class="mt-8 w-full py-4 border border-red-500/20 text-red-400 rounded-2xl font-bold text-sm">Log Out</button>
+                </div>
+            </div>
+
+            <nav class="absolute bottom-0 w-full bg-dark-900/95 backdrop-blur flex justify-around py-4 z-20 border-t border-white/5">
+                <button class="nav-btn active flex flex-col items-center gap-1 text-gold-400" data-target="tab-rooms"><i class="fa-solid fa-house text-xl"></i></button>
+                <button class="nav-btn flex flex-col items-center gap-1 text-gray-600" data-target="tab-dms"><i class="fa-solid fa-comment-dots text-xl"></i></button>
+
+              
